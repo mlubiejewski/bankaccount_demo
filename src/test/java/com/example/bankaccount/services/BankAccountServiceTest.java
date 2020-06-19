@@ -52,7 +52,7 @@ public class BankAccountServiceTest {
     }
 
     @Test
-    public void shouldExchangeCurrencyIfAvailable() throws BankAccountNotFoundException, InsufficentSourceAmountException {
+    public void shouldExchangeCurrencyIfAvailable() throws BankAccountNotFoundException, InsufficentSourceAmountException, SameCurrenciesException {
         BankAccount bankAccount = getBankAccount();
         bankAccount.setUsdAmount(BigDecimal.ZERO);
 

@@ -6,11 +6,15 @@ import com.example.bankaccount.model.BankAccount;
 import com.example.bankaccount.services.BankAccountService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/")
@@ -30,7 +34,7 @@ public class BankAccountController {
     }
 
     @PutMapping(value = "exchange/{pesel}")
-    public BankAccount exchange(@PathVariable String pesel, @RequestBody @Valid ExchangeDTO exchangeDTO) throws BankAccountNotFoundException, InsufficentSourceAmountException {
+    public BankAccount exchange(@PathVariable String pesel, @RequestBody @Valid ExchangeDTO exchangeDTO) throws BankAccountNotFoundException, InsufficentSourceAmountException, SameCurrenciesException {
         return bankAccountService.exchange(pesel, exchangeDTO);
     }
 
@@ -43,7 +47,7 @@ public class BankAccountController {
     }
 
     @ExceptionHandler(UserAgeNotSatisfiedException.class)
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ResponseStatus(value = HttpStatus.PRECONDITION_FAILED)
     public Map<String, String> handleUserAgeNotSatisfiedException(UserAgeNotSatisfiedException e){
         Map<String, String> error = new HashMap<>();
         error.put("message", e.getMessage());
@@ -51,7 +55,7 @@ public class BankAccountController {
     }
 
     @ExceptionHandler(BankAccountNotFoundException.class)
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
     public Map<String, String> handleBankAccountNotFoundException(BankAccountNotFoundException e){
         Map<String, String> error = new HashMap<>();
         error.put("message", e.getMessage());
@@ -59,7 +63,7 @@ public class BankAccountController {
     }
 
     @ExceptionHandler(InsufficentSourceAmountException.class)
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ResponseStatus(value = HttpStatus.PRECONDITION_FAILED)
     public Map<String, String> handleInsufficentSourceAmountException(InsufficentSourceAmountException e){
         Map<String, String> error = new HashMap<>();
         error.put("message", e.getMessage());
@@ -79,6 +83,14 @@ public class BankAccountController {
     public Map<String, String> handleSameCurrenciesException(SameCurrenciesException e){
         Map<String, String> error = new HashMap<>();
         error.put("message", e.getMessage());
+        return error;
+    }
+
+    @ExceptionHandler(value = { MethodArgumentNotValidException.class })
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public  Map<String, String> handleResourceNotFoundException(MethodArgumentNotValidException e) {
+        Map<String, String> error = new HashMap<>();
+        error.put("message", "Invalid parameter: " + e.getParameter().getParameterName());
         return error;
     }
 
