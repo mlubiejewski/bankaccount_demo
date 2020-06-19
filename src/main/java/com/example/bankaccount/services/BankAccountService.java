@@ -52,7 +52,7 @@ public class BankAccountService {
                 .orElseThrow(() -> new BankAccountNotFoundException("The bank account fot pesel " + pesel + " not found"));
     }
 
-    public BankAccount exchange(String pesel, ExchangeDTO exchangeDTO) throws BankAccountNotFoundException, InsufficentSourceAmountException {
+    public BankAccount exchange(String pesel, ExchangeDTO exchangeDTO) throws BankAccountNotFoundException, InsufficentSourceAmountException, SameCurrenciesException {
 
         BankAccount bankAccount = bankAccountRepository.findById(pesel)
                 .orElseThrow(() -> new BankAccountNotFoundException("The bank account for pesel " + pesel + " not found"));
@@ -73,9 +73,9 @@ public class BankAccountService {
         return bankAccountRepository.save(bankAccount);
     }
 
-    private void validateExchange(ExchangeDTO exchangeDTO, BankAccount bankAccount) throws InsufficentSourceAmountException {
+    private void validateExchange(ExchangeDTO exchangeDTO, BankAccount bankAccount) throws InsufficentSourceAmountException, SameCurrenciesException {
         if(exchangeDTO.getFromCurrency().equals(exchangeDTO.getToCurrency())){
-            throw new RuntimeException("Same currencies!");
+            throw new SameCurrenciesException("The currencies cannot be the same");
         }
         switch (exchangeDTO.getFromCurrency()){
             case PLN:

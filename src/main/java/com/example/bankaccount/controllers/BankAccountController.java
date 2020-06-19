@@ -74,5 +74,13 @@ public class BankAccountController {
         return error;
     }
 
+    @ExceptionHandler(SameCurrenciesException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleSameCurrenciesException(SameCurrenciesException e){
+        Map<String, String> error = new HashMap<>();
+        error.put("message", e.getMessage());
+        return error;
+    }
+
 
 }
